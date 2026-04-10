@@ -1,21 +1,25 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// Ma configuration Firebase
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "TON_API_KEY",
-    authDomain: "TON_PROJET.firebaseapp.com",
-    projectId: "TON_PROJET",
-    storageBucket: "TON_PROJET.appspot.com",
-    messagingSenderId: "...",
-    appId: "..."
+  apiKey: "AIzaSyBDF_WQdLqr6vzm5_iH9T1L2NLhiwtDi4A",
+  authDomain: "appli-apple.firebaseapp.com",
+  projectId: "appli-apple",
+  storageBucket: "appli-apple.firebasestorage.app",
+  messagingSenderId: "818508880757",
+  appId: "1:818508880757:web:02f5fc5e5be46215fc513c",
+  measurementId: "G-B5FZ7LRJCS"
 };
 
-// Initialisation
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const productList = document.getElementById('product-list');
+const analytics = getAnalytics(app);
+
 
 // Fonction pour créer le HTML d'une carte produit
 const createProductCard = (item) => {
