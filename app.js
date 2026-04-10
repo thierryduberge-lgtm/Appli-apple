@@ -10,10 +10,12 @@ const firebaseConfig = {
   appId: "1:818508880757:web:02f5fc5e5be46215fc513c"
 };
 
+// Initialisation
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productList = document.getElementById('product-list');
 
+// Fonction pour créer la carte visuelle
 const createProductCard = (item) => {
     const date = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
     return `
@@ -30,6 +32,7 @@ const createProductCard = (item) => {
         </div>`;
 };
 
+// Écoute des données en temps réel
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snapshot) => {
