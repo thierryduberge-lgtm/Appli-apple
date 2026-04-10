@@ -1,0 +1,58 @@
+
+/* Effet flou Apple sur le header */
+.header-glass {
+    position: sticky;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 50;
+}
+
+body {
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+}
+
+/* Indicateur de connexion */
+.status-indicator {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background-color: #10b981; /* Vert */
+}
+
+/* Style des boutons filtres */
+.filter-chip {
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    background: white;
+    border: 1px solid #d1d5db;
+}
+
+.filter-chip.active {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+/* Skeleton Loader Animation */
+.skeleton-card {
+    height: 140px;
+    background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 1rem;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Masquer la scrollbar des filtres */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
