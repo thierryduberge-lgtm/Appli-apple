@@ -38,8 +38,8 @@ def check_apple_refurb(db):
     url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
     
     # Critères de recherche - À MODIFIER SELON TES ENVIES
-    target_model = "MacBook Pro"
-    max_price = 2200.0
+    target_model = "MacBook Air"
+    max_price = 950
 
     print(f"[{datetime.now()}] Scan en cours...")
 
