@@ -13,77 +13,70 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productList = document.getElementById('product-list');
-const filterButtons = document.querySelectorAll('.filter-btn');
 
 let currentFilter = 'all';
+let lastSnapshot = null;
 
-// Fonction pour créer la carte visuelle
-const createProductCard = (item) => {
-    const date = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
-    return `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <div class="flex justify-between items-start">
-                <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">En stock</span>
-                <span class="text-xs text-gray-400">${date}</span>
-            </div>
-            <h2 class="text-lg font-medium text-gray-900 mt-1 leading-tight">${item.name}</h2>
-            <div class="flex justify-between items-end mt-4">
-                <p class="text-2xl font-bold">${item.price} €</p>
-                <a href="${item.url}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Acheter</a>
-            </div>
-        </div>`;
-};
-
-// Logique d'affichage avec filtre
-const updateDisplay = (snapshot) => {
+// Fonction de rendu (Affichage)
+const render = (snapshot) => {
+    if (!snapshot) return;
     productList.innerHTML = "";
     let count = 0;
 
     snapshot.forEach((doc) => {
-        const data = doc.data();
-        const matchesFilter = currentFilter === 'all' || data.name.toLowerCase().includes(currentFilter.toLowerCase());
+        const item = doc.data();
+        const matches = currentFilter === 'all' || item.name.toLowerCase().includes(currentFilter.toLowerCase());
         
-        if (matchesFilter) {
-            productList.innerHTML += createProductCard(data);
+        if (matches) {
+            const date = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
+            productList.innerHTML += `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">En stock</span>
+                        <span class="text-xs text-gray-400">${date}</span>
+                    </div>
+                    <h2 class="text-lg font-medium text-gray-900 mt-1 leading-tight">${item.name}</h2>
+                    <div class="flex justify-between items-end mt-4">
+                        <p class="text-2xl font-bold">${item.price} €</p>
+                        <a href="${item.url}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Acheter</a>
+                    </div>
+                </div>`;
             count++;
         }
     });
 
     if (count === 0) {
-        productList.innerHTML = `<div class="text-center py-10 w-full"><p class="text-gray-400 italic">Aucun modèle correspondant en stock...</p></div>`;
+        productList.innerHTML = `<div class="text-center py-10 w-full text-gray-400 italic">Aucun Mac disponible...</div>`;
     }
 };
 
-/// Fonction pour gérer le changement de filtre
-const handleFilterClick = (e) => {
+// --- GESTION DES BOUTONS ---
+// On utilise une méthode plus sûre pour capter les clics
+document.addEventListener('click', (e) => {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
 
-    // Mise à jour visuelle des boutons
-    filterButtons.forEach(b => {
-        b.classList.remove('bg-black', 'text-white');
-        b.classList.add('bg-gray-100', 'text-gray-600');
+    console.log("Clic détecté sur :", btn.innerText);
+
+    // Style visuel
+    document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.replace('bg-black', 'bg-gray-100');
+        b.classList.replace('text-white', 'text-gray-600');
     });
-    btn.classList.remove('bg-gray-100', 'text-gray-600');
-    btn.classList.add('bg-black', 'text-white');
+    btn.classList.replace('bg-gray-100', 'bg-black');
+    btn.classList.replace('text-gray-600', 'text-white');
 
-    // Application du filtre
+    // Filtrage
     currentFilter = btn.getAttribute('data-filter');
-    
-    // On force la mise à jour de l'affichage avec les données actuelles
-    // (Firebase renverra les données automatiquement via onSnapshot)
-};
-
-// Activer les boutons immédiatement
-filterButtons.forEach(btn => {
-    btn.addEventListener('click', handleFilterClick);
+    render(lastSnapshot);
 });
 
-// Écoute de Firebase (la requête reste la même)
+// --- CONNEXION FIREBASE ---
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
-
 onSnapshot(q, (snapshot) => {
-    console.log("Mise à jour Firebase reçue");
-    // On stocke le dernier snapshot pour pouvoir filtrer localement
-    updateDisplay(snapshot);
+    console.log("Données reçues de Firebase !");
+    lastSnapshot = snapshot;
+    render(snapshot);
+}, (error) => {
+    console.error("Erreur Firebase :", error);
 });
