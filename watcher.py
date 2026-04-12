@@ -16,32 +16,40 @@ def initialize_firebase():
     return None
 
 def check_apple_refurb(db):
-    url = "https://www.apple.com/fr/shop/refurbished/mac"
+    # Nouvelle URL plus fiable
+    url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
     headers = {'User-Agent': 'Mozilla/5.0'}
     
     try:
         response = requests.get(url, headers=headers)
         data = response.json()
-        products = data.get('added', []) or data.get('products', [])
+        # On essaie de récupérer les produits peu importe où ils sont cachés dans le JSON
+        products = data.get('added', []) or data.get('products', []) or data.get('tiles', [])
         
         if not products:
-            print("Aucun produit chez Apple.")
+            print("Aucun produit trouvé chez Apple actuellement.")
             return
 
         for p in products:
-            name = p.get('name')
-            price = float(p.get('price', {}).get('amount', '0').replace(',', '.'))
-            product_url = "https://www.apple.com" + p.get('productUrl', '')
-            product_id = p.get('partNumber')
+            name = p.get('name') or p.get('productTitle')
+            if not name: continue
 
-            # Enregistre dans Firebase
+            # Extraction propre du prix
+            price_data = p.get('price', {})
+            amount = str(price_data.get('amount', '0')).replace(',', '.')
+            price = float(amount)
+            
+            product_url = "https://www.apple.com" + p.get('productUrl', '')
+            product_id = p.get('partNumber', 'id_' + name[:5])
+
+            # On envoie à Firebase
             db.collection('refurb_products').document(product_id).set({
                 'name': name,
                 'price': price,
                 'url': product_url,
                 'timestamp': firestore.SERVER_TIMESTAMP
             })
-            print(f"Ajouté : {name}")
+            print(f"Trouvé : {name}")
             
     except Exception as e:
         print(f"Erreur : {e}")

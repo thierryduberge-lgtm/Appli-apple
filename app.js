@@ -12,60 +12,45 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const productList = document.getElementById('product-list');
+const list = document.getElementById('product-list');
 
-let currentFilter = 'all';
-let lastSnapshot = null;
+let filter = 'all';
+let data = [];
 
-const render = (snapshot) => {
-    if (!snapshot) return;
-    productList.innerHTML = "";
-    let count = 0;
+// Fonction pour afficher les cartes
+const show = () => {
+    list.innerHTML = "";
+    const filtered = data.filter(item => filter === 'all' || item.name.toLowerCase().includes(filter.toLowerCase()));
+    
+    if (filtered.length === 0) {
+        list.innerHTML = `<p class="text-center py-10 text-gray-400">Aucun produit disponible...</p>`;
+        return;
+    }
 
-    snapshot.forEach((doc) => {
-        const item = doc.data();
-        const matches = currentFilter === 'all' || item.name.toLowerCase().includes(currentFilter.toLowerCase());
-        
-        if (matches) {
-            const date = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
-            productList.innerHTML += `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">En stock</span>
-                        <span class="text-xs text-gray-400">${date}</span>
-                    </div>
-                    <h2 class="text-lg font-medium text-gray-900 mt-1 leading-tight">${item.name}</h2>
-                    <div class="flex justify-between items-end mt-4">
-                        <p class="text-2xl font-bold">${item.price} €</p>
-                        <a href="${item.url}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Acheter</a>
-                    </div>
-                </div>`;
-            count++;
-        }
+    filtered.forEach(item => {
+        list.innerHTML += `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
+                <h2 class="text-lg font-medium">${item.name}</h2>
+                <div class="flex justify-between items-center mt-4">
+                    <p class="text-2xl font-bold">${item.price} €</p>
+                    <a href="${item.url}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Acheter</a>
+                </div>
+            </div>`;
     });
-
-    if (count === 0) productList.innerHTML = `<p class="text-center text-gray-400 italic py-10">Aucun produit trouvé...</p>`;
 };
 
-// Écoute des clics sur les boutons
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-
-    document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('bg-black', 'text-white');
-        b.classList.add('bg-gray-100', 'text-gray-600');
+// Gestion des boutons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-black', 'text-white'));
+        btn.classList.add('bg-black', 'text-white');
+        filter = btn.getAttribute('data-filter');
+        show();
     });
-    btn.classList.add('bg-black', 'text-white');
-    btn.classList.remove('bg-gray-100', 'text-gray-600');
-
-    currentFilter = btn.getAttribute('data-filter');
-    render(lastSnapshot);
 });
 
-// Connexion Firebase
-const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
-onSnapshot(q, (snapshot) => {
-    lastSnapshot = snapshot;
-    render(snapshot);
+// Écoute Firebase
+onSnapshot(query(collection(db, "refurb_products"), orderBy("timestamp", "desc")), (snap) => {
+    data = snap.docs.map(doc => doc.data());
+    show();
 });
