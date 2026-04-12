@@ -10,10 +10,12 @@ const firebaseConfig = {
   appId: "1:818508880757:web:02f5fc5e5be46215fc513c"
 };
 
-// Initialisation
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productList = document.getElementById('product-list');
+const filterButtons = document.querySelectorAll('.filter-btn');
+
+let currentFilter = 'all';
 
 // Fonction pour créer la carte visuelle
 const createProductCard = (item) => {
@@ -32,18 +34,39 @@ const createProductCard = (item) => {
         </div>`;
 };
 
-// Écoute des données en temps réel
+// Logique d'affichage avec filtre
+const updateDisplay = (snapshot) => {
+    productList.innerHTML = "";
+    let count = 0;
 
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        const matchesFilter = currentFilter === 'all' || data.name.toLowerCase().includes(currentFilter.toLowerCase());
+        
+        if (matchesFilter) {
+            productList.innerHTML += createProductCard(data);
+            count++;
+        }
+    });
+
+    if (count === 0) {
+        productList.innerHTML = `<div class="text-center py-10 w-full"><p class="text-gray-400 italic">Aucun modèle correspondant en stock...</p></div>`;
+    }
+};
+
+// Écoute des données
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snapshot) => {
-    console.log("Données reçues :", snapshot.size); // Ceci nous aidera à déboguer
-    productList.innerHTML = "";
-    if (snapshot.empty) {
-        productList.innerHTML = `<div class="text-center py-10"><p class="text-gray-400 italic">Aucun Mac disponible en ce moment...</p></div>`;
-        return;
-    }
-    snapshot.forEach((doc) => {
-        productList.innerHTML += createProductCard(doc.data());
+    updateDisplay(snapshot);
+    
+    // On ré-écoute les clics sur les boutons si besoin
+    filterButtons.forEach(btn => {
+        btn.onclick = () => {
+            filterButtons.forEach(b => b.classList.remove('bg-black', 'text-white'));
+            btn.classList.add('bg-black', 'text-white');
+            currentFilter = btn.getAttribute('data-filter');
+            updateDisplay(snapshot);
+        };
     });
 });
