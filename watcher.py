@@ -33,55 +33,46 @@ def initialize_firebase():
             return None
 
 def check_apple_refurb(db):
-    """Analyse le site d'Apple et met à jour Firestore."""
-    # URL de l'API Refurb Apple France
+    """Analyse complète du Refurb Apple."""
+    # Cette URL est plus globale pour éviter les erreurs de catégorie
     url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
     
-    # Critères de recherche - À MODIFIER SELON TES ENVIES
-    # target_model = "MacBook Air"
-    # max_price = 950
-    # Remplace ces lignes (vers la ligne 36) :
-    target_model = "Mac" # On cherche TOUS les Mac
-    max_price = 5000     # On ne limite plus le prix pour le test
-
-    
-    print(f"[{datetime.now()}] Scan en cours...")
+    print(f"[{datetime.now()}] Scan global en cours...")
 
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
         response = requests.get(url, headers=headers)
         data = response.json()
         
-        products = data.get('added', [])
-        found = 0
-
-        for p in products:
-            name = p.get('name', '')
-            # Nettoyage du prix (Apple renvoie parfois des strings avec des virgules)
-            raw_price = p.get('price', {}).get('amount', '0').replace(',', '.')
-            price = float(raw_price)
-            product_url = "https://www.apple.com" + p.get('productUrl', '')
-            product_id = p.get('partNumber', '')
-
-            # Logique de filtrage
-            if target_model.lower() in name.lower() and price <= max_price:
-                print(f"Match trouvé : {name} à {price}€")
-                
-                # Mise à jour Firestore (idempotente)
-                db.collection('refurb_products').document(product_id).set({
-                    'name': name,
-                    'price': price,
-                    'url': product_url,
-                    'timestamp': firestore.SERVER_TIMESTAMP
-                })
-                found += 1
+        # Apple utilise souvent 'added' ou 'products'
+        products = data.get('added', []) or data.get('products', [])
         
-        print(f"Scan terminé. {found} produits ajoutés/mis à jour.")
+        if not products:
+            print("Apple ne renvoie aucun produit en ce moment.")
+            return
+
+        found = 0
+        for p in products:
+            name = p.get('name', 'Produit sans nom')
+            # Gestion plus robuste du prix
+            price_data = p.get('price', {})
+            raw_price = price_data.get('amount', '0').replace(',', '.')
+            price = float(raw_price)
+            
+            product_url = "https://www.apple.com" + p.get('productUrl', '')
+            product_id = p.get('partNumber', 'id_' + str(found))
+
+            # On enregistre TOUT sans filtre pour vérifier que ça marche
+            db.collection('refurb_products').document(product_id).set({
+                'name': name,
+                'price': price,
+                'url': product_url,
+                'timestamp': firestore.SERVER_TIMESTAMP
+            })
+            found += 1
+            print(f"Enregistré : {name}")
+        
+        print(f"Succès ! {found} produits envoyés à Firebase.")
 
     except Exception as e:
-        print(f"Erreur durant l'exécution : {e}")
-
-if __name__ == "__main__":
-    firestore_db = initialize_firebase()
-    if firestore_db:
-        check_apple_refurb(firestore_db)
+        print(f"Erreur durant le scan : {e}")
