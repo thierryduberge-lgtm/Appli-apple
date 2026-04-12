@@ -54,19 +54,36 @@ const updateDisplay = (snapshot) => {
     }
 };
 
-// Écoute des données
+/// Fonction pour gérer le changement de filtre
+const handleFilterClick = (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+
+    // Mise à jour visuelle des boutons
+    filterButtons.forEach(b => {
+        b.classList.remove('bg-black', 'text-white');
+        b.classList.add('bg-gray-100', 'text-gray-600');
+    });
+    btn.classList.remove('bg-gray-100', 'text-gray-600');
+    btn.classList.add('bg-black', 'text-white');
+
+    // Application du filtre
+    currentFilter = btn.getAttribute('data-filter');
+    
+    // On force la mise à jour de l'affichage avec les données actuelles
+    // (Firebase renverra les données automatiquement via onSnapshot)
+};
+
+// Activer les boutons immédiatement
+filterButtons.forEach(btn => {
+    btn.addEventListener('click', handleFilterClick);
+});
+
+// Écoute de Firebase (la requête reste la même)
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snapshot) => {
+    console.log("Mise à jour Firebase reçue");
+    // On stocke le dernier snapshot pour pouvoir filtrer localement
     updateDisplay(snapshot);
-    
-    // On ré-écoute les clics sur les boutons si besoin
-    filterButtons.forEach(btn => {
-        btn.onclick = () => {
-            filterButtons.forEach(b => b.classList.remove('bg-black', 'text-white'));
-            btn.classList.add('bg-black', 'text-white');
-            currentFilter = btn.getAttribute('data-filter');
-            updateDisplay(snapshot);
-        };
-    });
 });
