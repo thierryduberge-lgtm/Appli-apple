@@ -17,7 +17,7 @@ def initialize_firebase():
 
 def check_apple_refurb(db):
     # Nouvelle URL plus fiable
-    url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
+    url = "https://www.apple.com/fr/shop/refurbished/mac"
     headers = {'User-Agent': 'Mozilla/5.0'}
     
     try:
