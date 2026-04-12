@@ -16,43 +16,43 @@ def initialize_firebase():
     return None
 
 def check_apple_refurb(db):
-    # Nouvelle URL plus fiable
-    url = "https://www.apple.com/fr/shop/refurbished/mac"
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    # On utilise l'URL de l'API de store d'Apple
+    url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
     
     try:
         response = requests.get(url, headers=headers)
         data = response.json()
-        # On essaie de récupérer les produits peu importe où ils sont cachés dans le JSON
-        products = data.get('added', []) or data.get('products', []) or data.get('tiles', [])
         
-        if not products:
-            print("Aucun produit trouvé chez Apple actuellement.")
+        # On cherche partout où Apple peut cacher ses produits
+        sections = data.get('added', []) or data.get('products', []) or data.get('tiles', [])
+        
+        if not sections:
+            print("Aucun produit trouvé dans les données Apple.")
             return
 
-        for p in products:
+        for p in sections:
             name = p.get('name') or p.get('productTitle')
             if not name: continue
-
-            # Extraction propre du prix
-            price_data = p.get('price', {})
-            amount = str(price_data.get('amount', '0')).replace(',', '.')
+            
+            price_info = p.get('price', {})
+            # Nettoyage du prix (on enlève '€', les espaces, etc.)
+            amount = str(price_info.get('amount', '0')).replace(',', '.').replace('\xa0', '')
             price = float(amount)
             
             product_url = "https://www.apple.com" + p.get('productUrl', '')
-            product_id = p.get('partNumber', 'id_' + name[:5])
+            product_id = p.get('partNumber', name[:10])
 
-            # On envoie à Firebase
             db.collection('refurb_products').document(product_id).set({
                 'name': name,
                 'price': price,
                 'url': product_url,
                 'timestamp': firestore.SERVER_TIMESTAMP
             })
-            print(f"Trouvé : {name}")
+            print(f"OK : {name}")
             
     except Exception as e:
-        print(f"Erreur : {e}")
+        print(f"Erreur de scan : {e}")
 
 if __name__ == "__main__":
     db = initialize_firebase()
