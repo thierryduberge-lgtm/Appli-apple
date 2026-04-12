@@ -38,9 +38,13 @@ def check_apple_refurb(db):
     url = "https://www.apple.com/fr/shop/refurbished/v1/portal/model/mac"
     
     # Critères de recherche - À MODIFIER SELON TES ENVIES
-    target_model = "MacBook Air"
-    max_price = 950
+    # target_model = "MacBook Air"
+    # max_price = 950
+    # Remplace ces lignes (vers la ligne 36) :
+    target_model = "Mac" # On cherche TOUS les Mac
+    max_price = 5000     # On ne limite plus le prix pour le test
 
+    
     print(f"[{datetime.now()}] Scan en cours...")
 
     try:

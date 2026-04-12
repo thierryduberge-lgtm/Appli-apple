@@ -33,17 +33,17 @@ const createProductCard = (item) => {
 };
 
 // Écoute des données en temps réel
+
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snapshot) => {
+    console.log("Données reçues :", snapshot.size); // Ceci nous aidera à déboguer
     productList.innerHTML = "";
     if (snapshot.empty) {
-        productList.innerHTML = `<div class="text-center py-10"><p class="text-gray-400 italic">Aucun Mac disponible...</p></div>`;
+        productList.innerHTML = `<div class="text-center py-10"><p class="text-gray-400 italic">Aucun Mac disponible en ce moment...</p></div>`;
         return;
     }
     snapshot.forEach((doc) => {
         productList.innerHTML += createProductCard(doc.data());
     });
-}, (error) => {
-    console.error("Erreur Firestore:", error);
 });
