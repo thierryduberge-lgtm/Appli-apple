@@ -16,6 +16,6 @@ jobs:
       - name: Install dependencies
         run: pip install requests firebase-admin
       - name: Run watcher
-        run: python observateur.py
+        run: python watcher.py
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
