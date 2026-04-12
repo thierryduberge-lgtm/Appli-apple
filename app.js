@@ -17,7 +17,6 @@ const productList = document.getElementById('product-list');
 let currentFilter = 'all';
 let lastSnapshot = null;
 
-// Fonction de rendu (Affichage)
 const render = (snapshot) => {
     if (!snapshot) return;
     productList.innerHTML = "";
@@ -30,7 +29,7 @@ const render = (snapshot) => {
         if (matches) {
             const date = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
             productList.innerHTML += `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
                     <div class="flex justify-between items-start">
                         <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">En stock</span>
                         <span class="text-xs text-gray-400">${date}</span>
@@ -45,38 +44,28 @@ const render = (snapshot) => {
         }
     });
 
-    if (count === 0) {
-        productList.innerHTML = `<div class="text-center py-10 w-full text-gray-400 italic">Aucun Mac disponible...</div>`;
-    }
+    if (count === 0) productList.innerHTML = `<p class="text-center text-gray-400 italic py-10">Aucun produit trouvé...</p>`;
 };
 
-// --- GESTION DES BOUTONS ---
-// On utilise une méthode plus sûre pour capter les clics
+// Écoute des clics sur les boutons
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
 
-    console.log("Clic détecté sur :", btn.innerText);
-
-    // Style visuel
     document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.replace('bg-black', 'bg-gray-100');
-        b.classList.replace('text-white', 'text-gray-600');
+        b.classList.remove('bg-black', 'text-white');
+        b.classList.add('bg-gray-100', 'text-gray-600');
     });
-    btn.classList.replace('bg-gray-100', 'bg-black');
-    btn.classList.replace('text-gray-600', 'text-white');
+    btn.classList.add('bg-black', 'text-white');
+    btn.classList.remove('bg-gray-100', 'text-gray-600');
 
-    // Filtrage
     currentFilter = btn.getAttribute('data-filter');
     render(lastSnapshot);
 });
 
-// --- CONNEXION FIREBASE ---
+// Connexion Firebase
 const q = query(collection(db, "refurb_products"), orderBy("timestamp", "desc"));
 onSnapshot(q, (snapshot) => {
-    console.log("Données reçues de Firebase !");
     lastSnapshot = snapshot;
     render(snapshot);
-}, (error) => {
-    console.error("Erreur Firebase :", error);
 });
