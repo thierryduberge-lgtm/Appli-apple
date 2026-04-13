@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,28 +7,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
+    <!-- PWA iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Refurb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/644/644458.png">
+    <!-- Theme color -->
+    <meta name="theme-color" content="#ffffff">
 </head>
 <body class="pb-10">
 
     <header class="header-glass">
         <div class="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
             <h1 class="text-xl font-semibold tracking-tight">Refurb Watcher</h1>
-            <div id="connection-status" class="status-indicator"></div>
+            <div id="connection-status" class="status-indicator" title="Statut de connexion"></div>
         </div>
     </header>
 
     <main class="max-w-md mx-auto px-4 mt-6">
+
+        <!-- Barre de filtres -->
         <div class="filter-bar flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-            <button class="filter-btn bg-black text-white ..." data-filter="all">Tous</button>
-            <button class="filter-btn bg-gray-100 ..." data-filter="MacBook Air">MacBook Air</button>
-            <!-- <button class="filter-chip text-gray-500">iPad</button> -->
+            <button class="filter-btn active" data-filter="all">Tous</button>
+            <button class="filter-btn" data-filter="MacBook Air">MacBook Air</button>
+            <button class="filter-btn" data-filter="MacBook Pro">MacBook Pro</button>
+            <button class="filter-btn" data-filter="iPad">iPad</button>
+            <button class="filter-btn" data-filter="iPhone">iPhone</button>
         </div>
 
+        <!-- Liste des produits -->
         <div id="product-list" class="space-y-4">
+            <!-- Skeleton loader pendant le chargement -->
             <div class="skeleton-card"></div>
+            <div class="skeleton-card" style="animation-delay: 0.15s"></div>
+            <div class="skeleton-card" style="animation-delay: 0.3s"></div>
         </div>
+
     </main>
 
     <script type="module" src="app.js"></script>

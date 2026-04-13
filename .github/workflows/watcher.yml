@@ -1,0 +1,28 @@
+name: Refurb Watcher — Scan horaire
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # Toutes les heures pile
+  workflow_dispatch:        # Déclenchement manuel possible depuis GitHub
+
+jobs:
+  scan:
+    name: Scanner l'Apple Store reconditionné
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Configurer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Lancer le scan
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python watcher.py

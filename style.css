@@ -1,58 +1,139 @@
-
-/* Effet flou Apple sur le header */
-.header-glass {
-    position: sticky;
-    top: 0;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e5e7eb;
-    z-index: 50;
+/* ── Variables ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg: #f5f5f7;
+  --text: #1d1d1f;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --green: #10b981;
+  --red: #ef4444;
+  --radius: 15px;
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────────── */
 body {
-    background-color: #f5f5f7;
-    color: #1d1d1f;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
 }
 
-/* Indicateur de connexion */
+/* ── Header effet verre Apple ───────────────────────────────────────────────── */
+.header-glass {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 50;
+}
+
+/* ── Indicateur de connexion ────────────────────────────────────────────────── */
 .status-indicator {
-    height: 8px;
-    width: 8px;
-    border-radius: 50%;
-    background-color: #10b981; /* Vert */
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: var(--red);       /* Rouge par défaut (pas encore connecté) */
+  transition: background-color 0.4s ease;
 }
 
-/* Style des boutons filtres */
-.filter-chip {
-    padding: 4px 16px;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    white-space: nowrap;
-    background: white;
-    border: 1px solid #d1d5db;
+.status-indicator.connected {
+  background-color: var(--green);     /* Vert quand Firestore répond */
 }
 
-.filter-chip.active {
-    background: #000;
-    color: #fff;
-    border-color: #000;
+/* ── Boutons filtres ────────────────────────────────────────────────────────── */
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  background: white;
+  border: 1px solid #d1d5db;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/* Skeleton Loader Animation */
+.filter-btn:hover {
+  background: #f0f0f0;
+}
+
+.filter-btn.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* ── Cartes produits ────────────────────────────────────────────────────────── */
+.product-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid #eee;
+  transition: box-shadow 0.2s;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-name {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.product-price {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.buy-btn {
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.buy-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* ── État vide ──────────────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* ── Skeleton Loader ────────────────────────────────────────────────────────── */
 .skeleton-card {
-    height: 140px;
-    background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 1rem;
+  height: 120px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
 }
 
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* Masquer la scrollbar des filtres */
+/* ── Scrollbar cachée (barre filtres) ───────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
